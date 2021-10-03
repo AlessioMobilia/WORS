@@ -415,7 +415,7 @@ def main():
 
 
                                 except Exception as e:
-                                    print(e)
+                                    #print(e)
                                     continue
 
 
@@ -538,7 +538,7 @@ def main():
 
 
                                             elif GeiObj.name == "Unknown":
-                                                print("step 1")
+                                                #print("step 1")
 
                                                 # Recognition.
                                                 gei_query = GeiObj.gei_current / (gei_fix_num)
@@ -549,7 +549,7 @@ def main():
                                                 detected = False
                                                 q_id = 0
                                                 if (n_files >= 0):
-                                                    print("step 2")
+                                                    #print("step 2")
 
                                                     max_scores = np.zeros(n_files + 1)
                                                     max_scores_index = np.zeros(n_files + 1)
@@ -578,7 +578,7 @@ def main():
                                                             max_scores[nf] = score[q_id]
                                                             max_scores_index[nf] = q_id
 
-                                                            print(str(score[q_id]))
+                                                            #print(str(score[q_id]))
 
                                                 if detected:
 
@@ -595,7 +595,7 @@ def main():
 
                                                     id_rec = '%s' % name[q_id]
                                                     GeiObj.name = name[q_id]
-                                                    print('gei confidence' + str(max_scores[nf_index]))
+                                                    #print('gei confidence' + str(max_scores[nf_index]))
                                                     # remove to the GEI list
                                                     GeiList.remove(GeiObj)
 
@@ -624,7 +624,7 @@ def main():
 
                                     except Exception as e :
                                         print("Persona ignorata")
-                                        print(e)
+
 
                                 # end gait
 
@@ -632,19 +632,19 @@ def main():
 
 
 
-                                print(nameDetection)
+
                                 print_label(original_frame, x1, y1, x2, y2, foregroundFaceFalse, foregroundGaitFalse,
                                             foregroundFaceTrue, foregroundGaitTrue, nameDetection, objectId)
 
                             # If the video write is None
-                            #if writer is None:
-                            #    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-                            #    writer = cv2.VideoWriter(output, fourcc, fps,
-                            #                            (original_frame.shape[1], original_frame.shape[0]), True)
+                            if writer is None:
+                                fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+                                writer = cv2.VideoWriter(output, fourcc, fps,
+                                                        (original_frame.shape[1], original_frame.shape[0]), True)
 
                             # If the write is not None, write the frame with recognized faces to disk
-                            #if writer is not None:
-                            #    writer.write(original_frame)
+                            if writer is not None:
+                                writer.write(original_frame)
 
                             original_frame = imutils.resize(original_frame, width=1200)
                             cv2.imshow("Frame", original_frame)
