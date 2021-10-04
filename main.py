@@ -44,11 +44,12 @@ y2 = 0
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 class GeiPersonObj:
-    def __init__(self,objectId,name):
+    def __init__(self,objectId,name, scoreface):
         self.objectId = objectId
         self.numInGEI = 0
         self.gei_current = np.zeros((128, 88), np.single)
         self.name = name
+        self.scoreface = scoreface
 
 
 
@@ -71,6 +72,7 @@ def main():
 
     # Tolerance face recognition
     tolerance = 0.54
+    tolerancetwo = 0.65
 
     # Da fare
     checkFile(input=input, output=output,
@@ -351,6 +353,7 @@ def main():
                                         
 
                                         score = 1
+                                        scoref = score
 
                                         matchedIdxs = [i for (i, b) in enumerate(face_distances) if b]
                                         for i in matchedIdxs:
@@ -359,6 +362,7 @@ def main():
                                                 if (score > face_distances[i]):
                                                     score = face_distances[i]
                                                     name = data["names"][i]
+                                                    scoref = score
 
                                         # update the list of names
                                         names.append(name)
@@ -376,12 +380,13 @@ def main():
 
 
                                         if not objectId in nameDetection:
-                                            nameDetection[objectId] = [name, True, False]
+                                            nameDetection[objectId] = [name, True, False, scoref]
                                         else:
                                             if ((nameDetection[objectId][0] != name) and (name != "Unknown")):
                                                 nameDetection[objectId][0] = name
                                                 nameDetection[objectId][1] = True
                                                 nameDetection[objectId][2] = False
+                                                nameDetection[objectId][3] = scoref
 
 
                                                 # Current GMT time in a tuple format
@@ -428,21 +433,24 @@ def main():
                                 if not objectId in nameDetection:
                                     detected_name = 'Unknown'
                                     face_detected = False
+                                    scoreface = 1
                                 else:
                                     detected_name = nameDetection[objectId][0]
                                     face_detected = nameDetection[objectId][1]
+                                    scoreface = nameDetection[objectId][3]
 
                                 if (GeiObj == None):
-                                    GeiObj = GeiPersonObj(objectId, detected_name)
+                                    GeiObj = GeiPersonObj(objectId, detected_name, scoreface)
                                     GeiList.append(GeiObj)
                                 elif GeiObj.name != detected_name:
                                     GeiObj.name = detected_name
+                                    GeiObj.scoreface = scoreface
 
 
                                 
 
                                 # check if there are some gei for the same person that before has not been recognized
-                                if (detected_name != 'Unknown' and face_detected):
+                                if (detected_name != 'Unknown' and face_detected and scoreface < tolerancetwo):
                                     for ug in GeiUnknownList:
                                         if (
                                                 ug.objectId == objectId):  # check if it is in the unknown list and remove it
@@ -498,7 +506,7 @@ def main():
                                         if GeiObj.numInGEI > gei_fix_num:
 
                                             # if it has been identified save the gait
-                                            if GeiObj.name != "Unknown" and face_detected:
+                                            if GeiObj.name != "Unknown" and face_detected and GeiObj.scoreface < tolerancetwo:
 
                                                 # check if exist the same gei in the database
                                                 exist = False
