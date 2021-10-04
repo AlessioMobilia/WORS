@@ -369,7 +369,7 @@ def main():
                                         scorL.append(scoref)
 
                                     #if not objectId in nameDetection:
-                                            #nameDetection[objectId] = ["person1", True, False]
+                                            #nameDetection[objectId] = ["person1", True, False, score face recognition]
                                     
 
                                     # loop over the recognized faces
@@ -638,9 +638,9 @@ def main():
                                                     GeiList.remove(GeiObj)
 
                                                     if not objectId in nameDetection:
-                                                        nameDetection[objectId] = [GeiObj.name, False, True]
+                                                        nameDetection[objectId] = [GeiObj.name, False, True, 1]
                                                     elif nameDetection[objectId][1] == False:
-                                                        nameDetection[objectId] = [GeiObj.name, False, True]
+                                                        nameDetection[objectId] = [GeiObj.name, False, True, 1]
 
                                                     # add detection entry in the csv file
                                                     seconds = indexFrame / fps
