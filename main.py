@@ -71,8 +71,8 @@ def main():
 
 
     # Tolerance face recognition
-    tolerance = 0.54
-    tolerancetwo = 0.65
+    tolerance = 0.57
+    tolerancetwo = 0.51
 
     # Da fare
     checkFile(input=input, output=output,
@@ -177,7 +177,7 @@ def main():
 
                             # Frame Information
                             indexFrame += 1
-                            print("[ACTIVITY] generation of "+str(indexFrame)+" in "+str(countFrame)+" frames...")
+                            #print("[ACTIVITY] generation of "+str(indexFrame)+" in "+str(countFrame)+" frames...")
 
                             # Convert the input frame from BGR to RGB then resize it to have
                             # a width of 750px (to speedup processing)
@@ -336,6 +336,7 @@ def main():
                                                                             model="cnn")
                                     encodings = face_recognition.face_encodings(subframe, boxes)
                                     names = []
+                                    scorL = []
 
                                     # loop over the facial embeddings
                                     for encoding in encodings:
@@ -349,44 +350,66 @@ def main():
                                         face_distances = face_recognition.face_distance(data["encodings"],
                                                                                         encoding)
 
-                                        name = "Unknown"
-                                        
-
+                                        nameP = "Unknown"
                                         score = 1
-                                        scoref = score
+                                        scoref = 1
 
                                         matchedIdxs = [i for (i, b) in enumerate(face_distances) if b]
                                         for i in matchedIdxs:
+
                                             if (face_distances[i] < tolerance):
                                                 # print(str(face_distances[i]))
                                                 if (score > face_distances[i]):
                                                     score = face_distances[i]
-                                                    name = data["names"][i]
+                                                    nameP = data["names"][i]
                                                     scoref = score
 
                                         # update the list of names
-                                        names.append(name)
+                                        names.append(nameP)
+                                        scorL.append(scoref)
 
                                     #if not objectId in nameDetection:
                                             #nameDetection[objectId] = ["person1", True, False]
                                     
 
                                     # loop over the recognized faces
-                                    for ((top, right, bottom, left), name) in zip(boxes, names):
+                                    for ((top, right, bottom, left), nameT, valueScore) in zip(boxes, names, scorL):
+
                                         # rescale the face coordinates
                                         #cv2.rectangle(original_frame, (x1, y1), (x2, y2), (0, 255, 0), bbox_thick * 2)
                                         #cv2.putText(original_frame, name, (x1, y1 + 12), cv2.FONT_HERSHEY_COMPLEX_SMALL,
                                         #            fontScale, Text_colors, bbox_thick, lineType=cv2.LINE_AA)
 
-
                                         if not objectId in nameDetection:
-                                            nameDetection[objectId] = [name, True, False, scoref]
+                                            nameDetection[objectId] = [nameT, True, False, valueScore]
+
+                                            if (nameT != "Unknown"):
+                                                # Current GMT time in a tuple format
+                                                current_GMT = time.gmtime()
+
+                                                # ts stores timestamp
+                                                ts = calendar.timegm(current_GMT)
+
+                                                cv2.imwrite(
+                                                    pathImage + str(os.path.splitext(file)[0]) + '(' + str(ts) + ').jpg',
+                                                    original_frame)
+                                                seconds = indexFrame / fps
+                                                video_time = str(datetime.timedelta(seconds=seconds))
+
+                                                file_writer.writerow(['Person', str(objectId), nameT,
+                                                                      pathImage + str(
+                                                                          os.path.splitext(file)[0]) + '(' + str(
+                                                                          ts) + ').jpg', '',
+                                                                      str(video_time)])
+
+
+
                                         else:
-                                            if ((nameDetection[objectId][0] != name) and (name != "Unknown")):
-                                                nameDetection[objectId][0] = name
+                                            if ((nameDetection[objectId][0] != nameT) and (nameT != "Unknown")):
+                                                nameDetection[objectId][0] = nameT
                                                 nameDetection[objectId][1] = True
                                                 nameDetection[objectId][2] = False
-                                                nameDetection[objectId][3] = scoref
+                                                nameDetection[objectId][3] = valueScore
 
 
                                                 # Current GMT time in a tuple format
@@ -394,19 +417,25 @@ def main():
 
                                                 # ts stores timestamp
                                                 ts = calendar.timegm(current_GMT)
+
                                                 cv2.imwrite(
                                                     pathImage + str(os.path.splitext(file)[0]) + '(' + str(ts) + ').jpg',
                                                     original_frame)
                                                 seconds = indexFrame / fps
                                                 video_time = str(datetime.timedelta(seconds=seconds))
-                                                file_writer.writerow(['Person', str(objectId), name,
+
+                                                file_writer.writerow(['Person', str(objectId), nameT,
                                                                     pathImage + str(os.path.splitext(file)[0]) + '(' + str(ts) + ').jpg', '',
                                                                     str(video_time)])
 
 
 
+                                            elif ((nameDetection[objectId][0] == nameT) and (nameT != "Unknown")):
+                                                nameDetection[objectId][3] = valueScore
+
                                             else:
                                                 nameDetection[objectId][1] = True
+
 
                                         if (nameDetection[objectId][0] == "Unknown"):
                                             nameDetection[objectId][1] = False
@@ -427,6 +456,7 @@ def main():
 
 
                                 # gait recognition
+                                print(nameDetection)
 
                                 # check if there are frame already saved for the person
                                 GeiObj = next((x for x in GeiList if x.objectId == objectId), None)
@@ -487,7 +517,7 @@ def main():
                                         # Get coordinate position.
                                         ty, tx = (nim > 100).nonzero()
 
-                                    
+
 
 
                                         sy, ey = ty.min(), ty.max() + 1
