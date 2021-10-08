@@ -1,4 +1,5 @@
-# Gait&Face Recognition
+# A.S.S.I.
+## Automatic Survelliance System Indentifier
 This is a project for the subject of biometric systems. 
 
 ## Installation
