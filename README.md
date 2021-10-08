@@ -1,5 +1,5 @@
 # W.O.R.S.
-## Wide Open-source Relevation System
+## Wide Open-source Revelation System
 This is a project for the subject of biometric systems. 
 
 ## Installation
