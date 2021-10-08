@@ -1,5 +1,5 @@
-# A.S.S.I.
-## Automatic Survelliance System Indentifier
+# W.O.R.S.
+## Wide Open-source Relevation System
 This is a project for the subject of biometric systems. 
 
 ## Installation
